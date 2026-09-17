@@ -38,12 +38,6 @@ pnpm dev
 开发服务默认运行在 `http://localhost:3423`。开发环境下，前端请求的 `/api` 会由
 Vite 代理到 `http://localhost:8080`，因此不会受到浏览器跨域限制。
 
-如果后端不是运行在 `8080` 端口，可以在项目根目录创建 `.env.local`：
-
-```env
-VITE_API_PROXY_TARGET=http://localhost:后端端口
-```
-
 接口请求统一使用 `/api` 前缀，例如登录请求会通过代理转发到后端的 `/user/login`。
 
 ### Type-Check, Compile and Minify for Production
