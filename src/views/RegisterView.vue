@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { getErrorMessage } from '@/api/http'
 import { register, type RegisterParams } from '@/api/user'
 
 const router = useRouter()
@@ -44,12 +45,11 @@ const submit = async () => {
   loading.value = true
   try {
     const { confirmPassword: _confirmPassword, ...payload } = form
-    const data = await register(payload)
-    localStorage.setItem('token', data.token)
+    await register(payload)
     ElMessage.success('注册成功')
     await router.push('/login')
   } catch (error) {
-    ElMessage.error(typeof error === 'string' ? error : '注册失败，请稍后重试')
+    ElMessage.error(getErrorMessage(error, '注册失败，请稍后重试'))
   } finally {
     loading.value = false
   }

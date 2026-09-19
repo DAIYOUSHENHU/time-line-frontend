@@ -1,9 +1,11 @@
-import axios, {
-  type AxiosError,
-  type AxiosInstance,
-  type AxiosRequestConfig,
-  type AxiosResponse,
-} from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
+
+export interface ApiErrorBody {
+  code?: string
+  message?: string
+  msg?: string
+  details?: unknown
+}
 
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
@@ -29,12 +31,22 @@ http.interceptors.response.use(
     return res.data
   },
   (err) => {
-    // 错误统一处理
-    const msg = err.response?.data?.msg || '请求失败'
-    console.error('接口错误：', msg)
+    console.error('接口错误：', getErrorMessage(err))
     return Promise.reject(err)
   },
 )
+
+export function getErrorMessage(error: unknown, fallback = '请求失败') {
+  if (axios.isAxiosError<ApiErrorBody>(error)) {
+    return error.response?.data?.message || error.response?.data?.msg || error.message || fallback
+  }
+
+  if (error instanceof Error) {
+    return error.message || fallback
+  }
+
+  return fallback
+}
 
 export const request = <T>(config: AxiosRequestConfig) => http.request<T>(config)
 

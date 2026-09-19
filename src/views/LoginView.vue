@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { getErrorMessage } from '@/api/http'
 import { login, type LoginParams } from '@/api/user'
 
 const router = useRouter()
+const route = useRoute()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const form = reactive<LoginParams>({
@@ -25,17 +27,23 @@ const rules: FormRules<LoginParams> = {
 
 const submit = async () => {
   if (!formRef.value || loading.value) return
-
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
 
   loading.value = true
   try {
     const res = await login(form)
-    localStorage.setItem('token', res.data.token)
-    ElMessage.success('登录成功')
+    console.log(res);
+    if (res.data?.token) {
+      localStorage.setItem('token', res.data.token)
+      ElMessage.success('登录成功')
+      const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/timeline'
+      await router.push(redirect.startsWith('/') ? redirect : '/timeline')
+    } else {
+      ElMessage.error('登录失败，请重试')
+    }
   } catch (error) {
-    ElMessage.error(typeof error === 'string' ? error : '登录失败，请稍后重试')
+    ElMessage.error(getErrorMessage(error, '登录失败，请稍后重试'))
   } finally {
     loading.value = false
   }

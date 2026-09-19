@@ -23,8 +23,8 @@ export interface AuthResponse {
   user: User
 }
 
-export function login(params: any) {
-  return http.post('/user/login', params)
+export function login(params: LoginParams) {
+  return http.post<AuthResponse>('/user/login', params)
 }
 
 export const register = async (params: RegisterParams) => {

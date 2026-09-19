@@ -7,7 +7,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login',
+      redirect: () => (localStorage.getItem('token') ? '/timeline' : '/login'),
     },
     {
       path: '/login',
@@ -17,7 +17,29 @@ const router = createRouter({
       path: '/register',
       component: RegisterView,
     },
+    {
+      path: '/timeline',
+      component: () => import('@/views/TimelineView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
+})
+
+router.beforeEach((to) => {
+  const isAuthenticated = Boolean(localStorage.getItem('token'))
+
+  if (isAuthenticated && (to.path === '/login' || to.path === '/register')) {
+    return '/timeline'
+  }
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return {
+      path: '/login',
+      query: { redirect: to.fullPath },
+    }
+  }
+
+  return true
 })
 
 export default router
